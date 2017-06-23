@@ -1,0 +1,86 @@
+<link rel="import" href="../polymer/polymer-element.html">
+
+<script>
+  /**
+    * `curium-route`
+    * 
+    *
+    * @customElement
+    * @polymer
+    * @demo demo/index.html
+    */
+  class CuriumRoute extends Polymer.Element {
+
+    static get is() { return 'curium-route'; }
+    
+    static get properties() { return {
+      route: {
+        type: Object
+      },
+      prefixPattern: {
+        type: String
+      },
+      dataPattern: {
+        type: String,
+        value: ''
+      },
+
+      prefixMatch: {
+        type: Boolean,
+        readOnly: true,
+        notify: true
+      },
+      dataMatch: {
+        type: Boolean,
+        readOnly: true,
+        notify: true
+      },
+      data: {
+        type: Object,
+        readOnly: true,
+        notify: true
+      },
+      tail: {
+        type: Object,
+        readOnly: true,
+        notify: true
+      }
+    };}
+
+    static get observers() { return [
+      '_onRouteChanged(route.prefix, route.path, prefixPattern, dataPattern)'
+    ];}
+
+    _onRouteChanged(routePrefix, routePath, prefixPattern, dataPattern) {
+      let properties = {};
+
+      properties.prefixMatch = typeof prefixPattern !== 'string' || prefixPattern === routePrefix;
+
+      if (properties.prefixMatch && typeof routePath === 'string' && typeof dataPattern === 'string') {
+        let pathComponents = routePath.split('/');
+        pathComponents.shift();
+        let parameters = dataPattern.split('/');
+        parameters.shift();
+
+        properties.data = {};
+        for (let i = 0; i < parameters.length; ++i) {
+          if (parameters[i]) properties.data[parameters[i]] = pathComponents[i];
+        }
+
+        properties.dataMatch = pathComponents.length >= parameters.length;
+
+        if (properties.dataMatch) {
+          properties.tail = {
+            prefix: routePrefix + pathComponents.slice(0, parameters.length).map(e => '/' + e).join(''),
+            path: pathComponents.slice(parameters.length).map(e => '/' + e).join('')
+          };
+        }
+      }
+
+      this.setProperties(properties, true);
+    }
+
+  }
+
+  window.customElements.define(CuriumRoute.is, CuriumRoute);
+</script>

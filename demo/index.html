@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>curium-route demo</title>
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../polymer/lib/elements/dom-bind.html">
+    <link rel="import" href="../../polymer/lib/elements/dom-repeat.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    <link rel="import" href="../curium-route.html">
+
+    <custom-style>
+      <style is="custom-style" include="demo-pages-shared-styles">
+      </style>
+    </custom-style>
+  </head>
+  <body>
+    <div class="vertical-section-container centered">
+      <h3>Basic curium-route demo</h3>
+      <demo-snippet>
+        <template>
+          <style>
+            .indicator {
+              color: red;
+            }
+            .indicator[match] {
+              color: green;
+            }
+          </style>
+          <script>
+            window.addEventListener('dom-change', function(evt) {
+              let bind = evt.target;
+              bind.toRoute = function(prefix, path) {
+                return {
+                  prefix: prefix,
+                  path: path
+                };
+              }
+              bind.objToArr = function(obj) {
+                let arr = [];
+                for (let prop in obj) {
+                  arr.push({
+                    prop: prop,
+                    value: obj[prop]
+                  });
+                }
+                return arr;
+              }
+            });
+          </script>
+          <dom-bind>
+            <template>
+              <p>route prefix: <input type="text" value="{{routePrefix::input}}"></p>
+              <p>route path: <input type="text" value="{{routePath::input}}"></p>
+              <p>prefixPattern: <input type="text" value="{{prefixPattern::input}}"></p>
+              <p>dataPattern: <input type="text" value="{{dataPattern::input}}"></p>
+              <p>prefix match: <span class="indicator" match$="[[prefixMatch]]">[[prefixMatch]]</span></p>
+              <p>data match: <span class="indicator" match$="[[dataMatch]]">[[dataMatch]]</span></p>
+              <p>data:</p>
+              <ul>
+                <dom-repeat items="[[objToArr(data)]]">
+                  <template>
+                    <li>[[item.prop]]: [[item.value]]</li>
+                  </template>
+                </dom-repeat>
+              </ul>
+              <p>tail:</p>
+              <ul>
+                <dom-repeat items="[[objToArr(tail)]]">
+                  <template>
+                    <li>[[item.prop]]: [[item.value]]</li>
+                  </template>
+                </dom-repeat>
+              </ul>
+              <curium-route
+                route="[[toRoute(routePrefix, routePath)]]"
+                prefix-pattern="[[prefixPattern]]"
+                data-pattern="[[dataPattern]]"
+                prefix-match="{{prefixMatch}}"
+                data-match="{{dataMatch}}"
+                data="{{data}}"
+                tail="{{tail}}">
+              </curium-route>
+            </template>
+          </dom-bind>
+        </template>
+      </demo-snippet>
+    </div>
+  </body>
+</html>
