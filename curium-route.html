@@ -18,11 +18,16 @@
         type: Object
       },
       prefixPattern: {
-        type: String
+        type: String,
+        value: null
       },
       dataPattern: {
         type: String,
         value: ''
+      },
+
+      _cachedPrefixPattern: {
+        computed: '_computeCachedPrefixPattern(prefixPattern)'
       },
 
       prefixMatch: {
@@ -48,13 +53,28 @@
     };}
 
     static get observers() { return [
-      '_onRouteChanged(route.prefix, route.path, prefixPattern, dataPattern)'
+      '_onRouteChanged(route.prefix, route.path, _cachedPrefixPattern, dataPattern)'
     ];}
+
+    _computeCachedPrefixPattern(prefixPattern) {
+      if (prefixPattern === null || prefixPattern === undefined) {
+        return /.*/;
+      } else if (typeof prefixPattern === 'string' && prefixPattern[0] === '/' && prefixPattern[prefixPattern.length - 1] === '/') {
+        try {
+          return new RegExp(prefixPattern.substr(1, prefixPattern.length - 2));
+        } catch (e) {
+          console.error(e.message);
+          return /^(?!.*)$/;
+        }
+      } else {
+        return prefixPattern;
+      }
+    }
 
     _onRouteChanged(routePrefix, routePath, prefixPattern, dataPattern) {
       let properties = {};
-
-      properties.prefixMatch = typeof prefixPattern !== 'string' || prefixPattern === routePrefix;
+      
+      properties.prefixMatch = prefixPattern instanceof RegExp ? prefixPattern.test(routePrefix) : prefixPattern === routePrefix;
 
       if (properties.prefixMatch && typeof routePath === 'string' && typeof dataPattern === 'string') {
         let pathComponents = routePath.split('/');
